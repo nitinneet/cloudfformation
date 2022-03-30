@@ -1,2 +1,2 @@
 # cloudfformation
-Cloud formation with new vpc + ec2
+Cloud formation with new vpc + ec2 with ebs
