@@ -34,6 +34,7 @@ Parameters:
     Type: String
     Default: 10.192.21.0/24
 
+######## Creating VPC #########
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -45,6 +46,7 @@ Resources:
         - Key: Name
           Value: !Ref EnvironmentName
 
+######### Creating IGW ###########
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -52,12 +54,14 @@ Resources:
         - Key: Name
           Value: !Ref EnvironmentName
 
+######### Attaching IGW with subnet ########
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
 
+######### Creating Public Subnet1 ##########
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -69,6 +73,7 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
 
+######### Creating Public Subnet2 ##########
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -80,6 +85,7 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
 
+######### Creating Private Subnet1 ##########
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -91,6 +97,7 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ1)
 
+######### Creating Private Subnet2 ##########
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -102,12 +109,14 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
 
+########## Creating NatGateway1 ##############
   NatGateway1EIP:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
 
+########## Creating NatGateway2 ##############
   NatGateway2EIP:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
@@ -126,6 +135,7 @@ Resources:
       AllocationId: !GetAtt NatGateway2EIP.AllocationId
       SubnetId: !Ref PublicSubnet2
 
+########### Creating PublicRouteTable ###########
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -155,6 +165,7 @@ Resources:
       SubnetId: !Ref PublicSubnet2
 
 
+########### Creating PrivateRouteTable ###########
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -197,6 +208,8 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
+
+######### Creating SecurityGroup #############
   NoIngressSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -204,6 +217,8 @@ Resources:
       GroupDescription: "Security group with no ingress rule"
       VpcId: !Ref VPC
 
+
+######### Creating Ec2 instnace ############
   MyEC2Instance:
     Type: AWS::EC2::Instance
     DeletionPolicy: Retain
@@ -211,7 +226,7 @@ Resources:
       ImageId: "ami-03a0c45ebc70f98ea"
       AvailabilityZone: !Select [ 1, !GetAZs  '' ]
       InstanceType: "t2.micro"
-      KeyName: "testkey"
+      KeyName: "testkey" #Create key with name testkey
       SecurityGroupIds:
         - !Ref NoIngressSecurityGroup
       SubnetId: !Ref PrivateSubnet2
